@@ -102,18 +102,22 @@ class RemoteAuth extends BaseAuthStrategy {
     }
 
     async storeRemoteSession(options) {
-        /* Compress & Store Session */
-        const pathExists = await this.isValidPath(this.userDataDir);
-        if (pathExists) {
-            await this.compressSession();
-            await this.store.save({ session: path.join(this.dataPath, this.sessionName) });
-            await fs.promises.unlink(path.join(this.dataPath, `${this.sessionName}.zip`));
-            await fs.promises.rm(`${this.tempDir}`, {
-                recursive: true,
-                force: true,
-                maxRetries: this.rmMaxRetries,
-            }).catch(() => { });
-            if (options && options.emit) this.client.emit(Events.REMOTE_SESSION_SAVED);
+        try {
+            /* Compress & Store Session */
+            const pathExists = await this.isValidPath(this.userDataDir);
+            if (pathExists) {
+                await this.compressSession();
+                await this.store.save({ session: path.join(this.dataPath, this.sessionName) });
+                await fs.promises.unlink(path.join(this.dataPath, `${this.sessionName}.zip`));
+                await fs.promises.rm(`${this.tempDir}`, {
+                    recursive: true,
+                    force: true,
+                    maxRetries: this.rmMaxRetries,
+                }).catch(() => { });
+                if (options && options.emit) this.client.emit(Events.REMOTE_SESSION_SAVED);
+            }
+        } catch {
+            console.log('RemoteAuth 250905 storeRemoteSession fix');
         }
     }
 
@@ -203,7 +207,7 @@ class RemoteAuth extends BaseAuthStrategy {
                     }
                 }
             } catch (err) {
-                console.error('[RemoteAuth] deleteMetadata error:', err);
+                console.error('[RemoteAuth] 250905 deleteMetadata error:', err);
             }
         }
     }
